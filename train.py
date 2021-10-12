@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
+from keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 
@@ -68,6 +69,16 @@ test_targets = {
     "class_label": ts_labels,
     "bounding_box": ts_bboxs
 }
+# train_datagen = ImageDataGenerator(
+#         rescale=1./255,
+#         shear_range=0.2,
+#         zoom_range=0.2,
+#         horizontal_flip=True)
+
+# train_generator = train_datagen.flow(
+#     tr_images,
+#     batch_size = settings.BATCH_SIZE,
+#     )
 # initialize the optimizer, compile the model, and show the model
 # summary
 opt = Adam(learning_rate=settings.INIT_LR)
@@ -87,7 +98,8 @@ H = model.fit(
 # save the model
 logging.info("Saving the model.")
 model.save(settings.MODEL_PATH, save_format="h5")
-
+# save history
+utils.pickle_store(settings.CHEKPOINT_PATH_HISTORY, H.history)
 # save the label binarizer
 # logging.info("Saving the label binarizer.")
 # utils.write(settings.LB_PATH, pickle.dumps(lb), 'wb')
@@ -95,43 +107,5 @@ model.save(settings.MODEL_PATH, save_format="h5")
 
 
 # save the image of training value.
-N = np.arange(0, settings.NUM_EPOCHS)
-def accuracy_plots():
-    plt.style.use("ggplot")
-    plt.figure()
-    plt.plot(N, H.history["class_label_accuracy"],
-        label="class_label_train_acc")
-    plt.plot(N, H.history["val_class_label_accuracy"],
-        label="val_class_label_acc")
-    plt.title("Class Label Accuracy")
-    plt.xlabel("Epoch #")
-    plt.ylabel("Accuracy")
-    plt.legend(loc="lower left")
-    # save the accuracies plot
-    plotPath = os.path.join(settings.PLOTS_PATH, "accs.png")
-    plt.savefig(plotPath)
-
-
-def loss_plots():
-    lossNames = ["loss", "class_label_loss", "bounding_box_loss"]
-    plt.style.use("ggplot")
-    (fig, ax) = plt.subplots(3, 1, figsize=(13, 13))
-    # loop over the loss names
-    for (i, l) in enumerate(lossNames):
-        # plot the loss for both the training and validation data
-        title = "Loss for {}".format(l) if l != "loss" else "Total loss"
-        ax[i].set_title(title)
-        ax[i].set_xlabel("Epoch #")
-        ax[i].set_ylabel("Loss")
-        ax[i].plot(N, H.history[l], label=l)
-        ax[i].plot(N, H.history["val_" + l], label="val_" + l)
-        ax[i].legend()
-    # save the losses figure and create a new figure for the accuracies
-    plt.tight_layout()
-    plotPath = os.path.join(settings.PLOTS_PATH, "losses.png")
-    plt.savefig(plotPath)
-    plt.close()
-
-
-accuracy_plots()
-loss_plots()
+utils.accuracy_plots(H.history)
+utils.loss_plots(H.history)

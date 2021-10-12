@@ -23,6 +23,7 @@ PLOTS_PATH = os.path.join(BASE_OUTPUT, "plots")
 TEST_PATHS = os.path.join(BASE_OUTPUT, "test_paths.txt")
 CHEKPOINT_PATH = os.path.join(BASE_OUTPUT, 'checkpoints')
 
+
 ## PICKLES
 PICKLE_URL = os.path.join(BASE_OUTPUT, "pickles")
 TRAIN_IMAGE_PICKLE_URL = os.path.join(PICKLE_URL, "train_images.pickle")
@@ -34,3 +35,4 @@ TEST_BBOX_PICKLE_URL = os.path.join(PICKLE_URL, "test_bbox.pickle")
 TRAIN_IMAGE_PATHS_PICKLE_URL = os.path.join(PICKLE_URL, "train_image_paths.pickle")
 TEST_IMAGE_PATHS_PICKLE_URL = os.path.join(PICKLE_URL, "test_image_paths.pickle")
 LB_PATH = os.path.join(PICKLE_URL, "lb.pickle")
+CHEKPOINT_PATH_HISTORY = os.path.join(PICKLE_URL, 'history.pickle')

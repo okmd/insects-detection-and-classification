@@ -113,7 +113,7 @@ def prepare_data_pickle():
             image = img_to_array(image)
             data.append(image)
             labels.append(label)
-            bboxes.append((sx,sy,ex,ey))
+            bboxes.append((sx,sy,ex,ey)) #(0.1523076923076923, 0.55, 0.8061538461538461, 0.7952380952380952)
             image_paths.append(image_path)
         except Exception as e:
             print(image_path)

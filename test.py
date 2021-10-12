@@ -1,6 +1,8 @@
 
 import pickle
 import re
+import argparse
+
 
 import cv2
 import imutils
@@ -12,31 +14,32 @@ from tensorflow.keras.preprocessing.image import img_to_array, load_img
 import settings
 import utils
 
+parser = argparse.ArgumentParser(description='Process arguments to evaluate or predict.')
+parser.add_argument('-e', '--evaluate', action="store_true", help='Use to evaluate the model.')
+parser.add_argument('-p', '--predict',  help='Provide the image to predict and prediction will be saved in output as predictions.png.')
+
+args = parser.parse_args()
+
 model = load_model(settings.MODEL_PATH)
 # model.load_weights(checkpoint_path)
-ts_images =utils.pickle_load(settings.TEST_IMAGE_PICKLE_URL)
-ts_labels =utils.pickle_load(settings.TEST_LABELS_PICKLE_URL)
-ts_bboxs = utils.pickle_load(settings.TEST_BBOX_PICKLE_URL)
-ts_img_paths = utils.pickle_load(settings.TEST_IMAGE_PATHS_PICKLE_URL)
 lb = utils.pickle_load(settings.LB_PATH)
 
-test_targets = {
-    "class_label": ts_labels,
-    "bounding_box": ts_bboxs
-}
-loss, bbox_lox, label_loss, bbox_acc, label_acc = model.evaluate(ts_images, test_targets, verbose=1)
-print("Untrained model, box accuracy: {:5.2f}%".format(100 * bbox_acc))
-print("Untrained model, label accuracy: {:5.2f}%".format(100 * label_acc))
-
-
-# 7/7 - 52s - loss: 1.9164 - bounding_box_loss: 0.0139 - class_label_loss: 1.9025 - bounding_box_accuracy: 0.7296 - class_label_accuracy: 0.4082
-# Traceback (most recent call last):
-#   File ".\test.py", line 27, in <module>
-#     loss, acc = model.evaluate(ts_images, test_targets, verbose=2)
-# ValueError: too many values to unpack (expected 2)
-
-
-
+def evaluate():
+    ts_images =utils.pickle_load(settings.TEST_IMAGE_PICKLE_URL)
+    ts_labels =utils.pickle_load(settings.TEST_LABELS_PICKLE_URL)
+    ts_bboxs = utils.pickle_load(settings.TEST_BBOX_PICKLE_URL)
+    # ts_img_paths = utils.pickle_load(settings.TEST_IMAGE_PATHS_PICKLE_URL)
+    test_targets = {
+        "class_label": ts_labels,
+        "bounding_box": ts_bboxs
+    }
+    loss, bbox_loss, label_loss, bbox_acc, label_acc = model.evaluate(ts_images, test_targets, verbose=1)
+    print("Total Loss: {:5.2f}%".format(100 * loss))
+    print("Label Loss: {:5.2f}%".format(100 * label_loss))
+    print("Label Accuracy: {:5.2f}%".format(100 * label_acc))
+    print("Box Loass: {:5.2f}%".format(100 * bbox_loss))
+    print("Box Accuracy: {:5.2f}%".format(100 * bbox_acc))
+    
 
 
 def predict(image_path):
@@ -79,13 +82,15 @@ def show(image):
     # show the output image
     # plt.grid(False)
     # plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-    cv2.imshow("A", image)
-    cv2.waitKey(0)
+    cv2.imwrite(f"{settings.BASE_OUTPUT}/predictions.png", image)
 
 
 image_path = f"{settings.IMAGES_PATH}/IP000000003.jpg"
 
 
 # running
-image = draw_bbox_and_title(image_path)
-show(image)
+if args.evaluate:
+    evaluate()
+if args.predict:
+    image = draw_bbox_and_title(args.predict)
+    show(image)
