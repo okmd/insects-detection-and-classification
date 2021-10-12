@@ -26,9 +26,9 @@ def download():
     drive_annotation_url = "https://drive.google.com/uc?id=1TV1jaAp-XwhDupy_xfy4XPcmSFUb83c8"
     local_annotation_url = f"{settings.BASE_PATH}/annotations.tar"
     gdown.download(drive_images_url, local_images_url, quiet=False)
-    utils.untar(local_images_url, settings.IMAGES_PATH)
+    utils.untar(local_images_url, settings.BASE_PATH)
     gdown.download(drive_annotation_url, local_annotation_url, quiet=False)
-    utils.untar(local_annotation_url, settings.ANNOTATION_PATH)
+    utils.untar(local_annotation_url, settings.BASE_PATH)
 
 # split the dataset into number of classes
 def save_classes_pickle(save=False):
