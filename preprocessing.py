@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.preprocessing.image import img_to_array, load_img
 from tqdm import tqdm
-import gdown
+# import gdown
 
 import settings
 import utils
@@ -116,6 +116,9 @@ def prepare_data_pickle():
         try:
             (filename, startX, startY, endX, endY, label) = row.split(',')
             image_path = f"{settings.IMAGES_PATH}/{filename}"
+            if image_path.split('.')[-1].lower() not in ['jpg', 'png']:
+                image_path = f"{image_path}.jpg"
+
             image = cv2.imread(image_path)
             h,w = image.shape[:2]
             sx = float(startX)/w
@@ -161,7 +164,7 @@ def prepare_data_pickle():
 
 # Create necessary folders
 utils.create_directories()
-logging.info("Downloading Data.")
+# logging.info("Downloading Data.")
 download()
 logging.info("Saving the class names in pickel.")
 classes = save_classes_pickle(save=True)

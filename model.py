@@ -23,11 +23,9 @@ def transfer_lr_model():
     bboxh = Dense(32, activation="relu")(bboxh)
     bboxh = Dense(4, activation="sigmoid", name="bounding_box")(bboxh)
 
-    softh= Dense(1024, activation="relu")(flatten)
+    softh= Dense(512, activation="relu")(flatten)
     softh = Dropout(0.5)(softh)
-    softh= Dense(512, activation="relu")(softh)
-    softh = Dropout(0.5)(softh)
-    softh = Dense(256, activation="relu")(softh)
+    softh = Dense(512, activation="relu")(softh)
     softh = Dropout(0.5)(softh)
     softh = Dense(settings.CLASSES, activation="softmax", name="class_label")(softh)
     model= Model(inputs=model.input, outputs=(bboxh, softh))
@@ -56,4 +54,4 @@ def custom_model():
     print(model.summary())
     return  model
 
-classification_regression_model = custom_model()
+classification_regression_model = transfer_lr_model()

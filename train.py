@@ -37,7 +37,6 @@ ts_bboxs = utils.pickle_load(settings.TEST_BBOX_PICKLE_URL)
 tr_img_paths = utils.pickle_load(settings.TRAIN_IMAGE_PATHS_PICKLE_URL)
 ts_img_paths = utils.pickle_load(settings.TEST_IMAGE_PATHS_PICKLE_URL)
 lb = utils.pickle_load(settings.LB_PATH)
-
 # split for trainging and testing
 # split = train_test_split(data, labels, bboxes,
 #                          image_paths, test_size=0.2, random_state=42)
@@ -86,7 +85,7 @@ model.compile(loss=losses, optimizer=opt, metrics=[
               "accuracy"], loss_weights=loss_weights)
 print(model.summary())
 
-cp_callback = ModelCheckpoint(filepath=settings.CHEKPOINT_PATH,save_weights_only=True, verbose=1)
+cp_callback = ModelCheckpoint(filepath=settings.CHEKPOINT_PATH, save_weights_only=True, verbose=1)
 logging.info("Training the model.")
 H = model.fit(
     tr_images, train_targets,
