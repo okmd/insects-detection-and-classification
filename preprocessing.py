@@ -25,10 +25,12 @@ def download():
     local_images_url = f"{settings.BASE_PATH}/images.tar"
     drive_annotation_url = "https://drive.google.com/uc?id=1TV1jaAp-XwhDupy_xfy4XPcmSFUb83c8"
     local_annotation_url = f"{settings.BASE_PATH}/annotations.tar"
-    gdown.download(drive_images_url, local_images_url, quiet=False)
-    utils.untar(local_images_url, settings.BASE_PATH)
-    gdown.download(drive_annotation_url, local_annotation_url, quiet=False)
-    utils.untar(local_annotation_url, settings.BASE_PATH)
+    if not os.path.exists(local_images_url):
+        gdown.download(drive_images_url, local_images_url, quiet=False)
+        utils.untar(local_images_url, settings.BASE_PATH)
+    if not os.path.exists(local_annotation_url):
+        gdown.download(drive_annotation_url, local_annotation_url, quiet=False)
+        utils.untar(local_annotation_url, settings.BASE_PATH)
 
 # split the dataset into number of classes
 def save_classes_pickle(save=False):
@@ -39,10 +41,8 @@ def save_classes_pickle(save=False):
     for i in content:
         labels.append(("".join(re.split("[^a-zA-Z ]*", i)).strip()))
     # take first n classes only
-    labels = labels[:settings.CLASSES]
     if save:
         utils.pickle_store(settings.CLASSES_PATH, labels)
-        # utils.write(settings.CLASSES_PATH, pickle.dumps(labels), 'wb')
     return labels
 
 # prepare cvs file of 1st n classes online
@@ -61,13 +61,13 @@ def prepare_row(file, classes):
         
     if isinstance(objs, list):
         for obj in objs:
-            if int(obj['name']) >= settings.CLASSES:
-                break
+            # if int(obj['name']) >= settings.CLASSES:
+            #     break
             classname = classes[int(obj['name'])].title()
             xmin, ymin,xmax, ymax = get_min_max(obj)
             ans.append((image_name, xmin, ymin, xmax,ymax, classname))
     
-    elif int(objs['name']) < settings.CLASSES:
+    else:#if int(objs['name']) < settings.CLASSES:
         classname =  classes[int(objs['name'])].title()
         xmin, ymin,xmax, ymax = get_min_max(objs)
         ans.append((image_name, xmin, ymin, xmax,ymax, classname))
@@ -92,13 +92,26 @@ def save_csv(classes, save=False):
         # utils.write(settings.COMPLETE_PATH, pickle.dumps(csv_files))
         
 
+def get_top_classes():
+    df = pd.read_csv(settings.COMPLETE_PATH)
+    top_n_classes = (df['class'].value_counts() > df['class'].value_counts().median()).nlargest(settings.CLASSES).keys()
+    df_top_n_classes = df.loc[df['class'].isin(top_n_classes)]
+    df_top_n_counts = df_top_n_classes['class'].value_counts()
+    min_images_per_class = df_top_n_counts.min()
+    new_df = pd.DataFrame(columns=df.columns)
+    for cls in top_n_classes:
+        all_rows = df_top_n_classes.loc[df_top_n_classes['class'] == cls]
+        min_rows = all_rows.iloc[:min_images_per_class, :]
+        new_df = pd.concat([new_df, min_rows],ignore_index = True)
+    new_df.to_csv(settings.NORMALIZED_PATH, index=False)
+
 def prepare_data_pickle():
     data = []
     labels = []
     bboxes = []
     image_paths = []
 
-    csv_file_content = utils.read(settings.COMPLETE_PATH)
+    csv_file_content = utils.read(settings.NORMALIZED_PATH)
     for row in tqdm(csv_file_content.split("\n")[1:]):
         try:
             (filename, startX, startY, endX, endY, label) = row.split(',')
@@ -154,5 +167,6 @@ logging.info("Saving the class names in pickel.")
 classes = save_classes_pickle(save=True)
 logging.info("Creating Info Csv file for all data of n classes and their images.")
 save_csv(classes, save=True)
+get_top_classes()
 logging.info("Creating pickle file of images, labels, bboxes and image_paths.")
 prepare_data_pickle()

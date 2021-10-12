@@ -14,6 +14,7 @@ IMAGES_PATH = os.path.join(BASE_PATH, "JPEGImages")
 ANNOTATION_PATH = os.path.join(BASE_PATH, "Annotations")
 CLASSES_PATH = os.path.join(BASE_PATH, "classes.pickle")
 COMPLETE_PATH = os.path.join(BASE_PATH, "complete.csv")
+NORMALIZED_PATH = os.path.join(BASE_PATH, "normalized.csv")
 
 
 # Output directory
