@@ -1,7 +1,7 @@
 import os
 # Hyper-parameter for training.
 INIT_LR = 0.0003
-NUM_EPOCHS = 1
+NUM_EPOCHS = 20
 BATCH_SIZE = 32
 CLASSES = 10
 TEST_SPLIT = 0.2

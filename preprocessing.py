@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow.keras.preprocessing.image import img_to_array, load_img
 from tqdm import tqdm
-# import gdown
+import gdown
 
 import settings
 import utils

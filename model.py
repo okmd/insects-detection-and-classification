@@ -1,5 +1,5 @@
 # model
-from tensorflow.keras.applications import vgg16, resnet
+from tensorflow.keras.applications import vgg19, resnet
 from tensorflow.keras.layers import Dense, Dropout, Flatten, Input, Conv2D,MaxPooling2D
 from tensorflow.keras.models import Model
 
@@ -13,7 +13,7 @@ import settings
 
 
 def transfer_lr_model():
-    model = vgg16.VGG16(weights= "imagenet", include_top=False, input_tensor=Input(shape=(settings.IMG_WIDTH, settings.IMG_HEIGHT, settings.IMG_CHANNEL)))
+    model = vgg19.VGG19(weights= "imagenet", include_top=False, input_tensor=Input(shape=(settings.IMG_WIDTH, settings.IMG_HEIGHT, settings.IMG_CHANNEL)))
     model.trainable = False
     flatten = model.output
     flatten=Flatten()(flatten)
