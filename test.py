@@ -49,7 +49,7 @@ def predict_box_label(image_path):
     # probability
     i = np.argmax(labelPreds, axis=1)
     label = lb.classes_[i][0]
-    print(label, i)
+    # print(label, i)
     return label, startX, startY, endX, endY, np.max(labelPreds)
 
 
