@@ -14,12 +14,6 @@ from tensorflow.keras.preprocessing.image import img_to_array, load_img
 import settings
 import utils
 
-parser = argparse.ArgumentParser(description='Process arguments to evaluate or predict.')
-parser.add_argument('-e', '--evaluate', action="store_true", help='Use to evaluate the model.')
-parser.add_argument('-p', '--predict',  help='Provide the image to predict and prediction will be saved in output as predictions.png.')
-
-args = parser.parse_args()
-
 model = load_model(settings.MODEL_PATH)
 # model.load_weights(checkpoint_path)
 lb = utils.pickle_load(settings.LB_PATH)
@@ -42,7 +36,7 @@ def evaluate():
     
 
 
-def predict(image_path):
+def predict_box_label(image_path):
     image = load_img(image_path, target_size=(
         settings.IMG_WIDTH, settings.IMG_HEIGHT))
     image = img_to_array(image) / 255.0
@@ -55,11 +49,12 @@ def predict(image_path):
     # probability
     i = np.argmax(labelPreds, axis=1)
     label = lb.classes_[i][0]
-    return label, startX, startY, endX, endY
+    print(label, i)
+    return label, startX, startY, endX, endY, np.max(labelPreds)
 
 
 def draw_bbox_and_title(image_path):
-    label, startX, startY, endX, endY = predict(image_path)
+    label, startX, startY, endX, endY, prob = predict_box_label(image_path)
     image = cv2.imread(image_path)
     image = imutils.resize(image, width=600)
     (h, w) = image.shape[:2]
@@ -71,11 +66,12 @@ def draw_bbox_and_title(image_path):
     endY = int(endY * h)
     # draw the predicted bounding box and class label on the image
     y = startY - 10 if startY - 10 > 10 else startY + 10
-    cv2.putText(image, label, (startX, y),
+    prob = f"{prob*100:0.2f}"
+    cv2.putText(image, f"{label} {prob}%", (startX, y),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 255, 0), 2)
     cv2.rectangle(image, (startX, startY), (endX, endY), (0, 255, 0), 2)
     # BGR image
-    return image
+    return image, label, prob
 
 
 def show(image):
@@ -85,12 +81,22 @@ def show(image):
     cv2.imwrite(f"{settings.BASE_OUTPUT}/predictions.png", image)
 
 
-image_path = f"{settings.IMAGES_PATH}/IP000000003.jpg"
-
 
 # running
-if args.evaluate:
-    evaluate()
-if args.predict:
-    image = draw_bbox_and_title(args.predict)
-    show(image)
+if __name__=="__main__":
+    
+    parser = argparse.ArgumentParser(description='Process arguments to evaluate or predict.')
+    parser.add_argument('-e', '--evaluate', action="store_true", help='Use to evaluate the model.')
+    parser.add_argument('-p', '--predict',  help='Provide the image to predict and prediction will be saved in output as predictions.png.')
+
+    args = parser.parse_args()
+
+
+
+    image_path = f"{settings.IMAGES_PATH}/IP000000003.jpg"
+
+    if args.evaluate:
+        evaluate()
+    if args.predict:
+        image = draw_bbox_and_title(args.predict)
+        show(image)
